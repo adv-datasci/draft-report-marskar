@@ -90,56 +90,60 @@ print("This report was last updated on", d, "at", t)
 
 # Any results I write to the current directory are saved as output.
 
-# In[2]:
+# In[26]:
 
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import matplotlib.pyplot as plt # data visualization
-import datetime as dt
 import seaborn as sns
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
-from sklearn import ensemble
+from sklearn.ensemble import ExtraTreesRegressor
 get_ipython().run_line_magic('matplotlib', 'inline')
 ### Seaborn style
 sns.set_style("whitegrid")
 
 
-# In[3]:
+# In[25]:
 
 
-prop = pd.read_csv("../input/properties_2016.csv")
+prop = pd.read_csv("../input/properties_2016.csv", low_memory=False)
 prop.shape
 
 
-# In[4]:
+# In[44]:
 
 
 ### ... check for NaNs
 nan = prop.isnull().sum()/len(prop)*100
-nan
 
 
-# In[5]:
+# In[50]:
 
 
 ### Plotting NaN counts
 nan_sorted = nan.sort_values(ascending=False).to_frame().reset_index()
-nan_sorted.columns = ['Column', 'Number of NaNs']
+nan_sorted.columns = ['Column', 'percentNaN']
 
 
-# In[6]:
+# In[51]:
 
 
-fig, ax = plt.subplots(figsize=(12, 25))
-sns.barplot(x="Number of NaNs", y="Column", data=nan_sorted, color='Blue', ax=ax)
-ax.set(xlabel="Number of NaNs", ylabel="", title="Total Number of NaNs in each column")
+nan_sorted.head()
+
+
+# In[52]:
+
+
+fig, ax = plt.subplots(figsize=(6, 12.5), dpi=300)
+sns.barplot(x="percentNaN", y="Column", data=nan_sorted, color='Blue', ax=ax)
+ax.set(xlabel="Missing Values (%)", ylabel="", title="Percent Missing Values in each column")
 plt.show()
 
 
-# There are several columns which have a very high proportion of missing values. It may be worth analysing these more closely.
+# There are several columns which have a very high proportion of missing values. I will remove features that have more than 80% missing values.
 
 # #### Feature Importance by Random Forest
 
@@ -216,10 +220,10 @@ ax.set(xlabel="Importance", ylabel="Feature Name", title="Feature Importances")
 plt.show()
 
 
-# In[15]:
+# In[32]:
 
 
-etr = ensemble.ExtraTreesRegressor(n_estimators=25, max_depth=30, max_features=0.3, n_jobs=-1, random_state=0)
+etr = ExtraTreesRegressor(n_estimators=25, max_depth=30, max_features=0.3, n_jobs=-1, random_state=0)
 etr.fit(x_train, y_train)
 
 
